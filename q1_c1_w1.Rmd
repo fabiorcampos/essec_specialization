@@ -1,0 +1,81 @@
+---
+title: "Quiz - c1 - w1"
+author: "Fábio Rocha Campos"
+date: "12 de outubro de 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+df = read.csv("./data/quiz1_c1_w1.csv", header = TRUE, sep = ",")
+```
+
+### What is the correct mean and standard deviation of the quantity of pasta purchased by time unit by household?
+
+```{r}
+q1 = c(mean(df$PASTA), sd(df$PASTA))
+q1
+```
+
+### In which area are located (i) the poorest household and (ii) the wealthiest household?
+
+```{r}
+order.scores = order(df$INCOME)
+df = df[order.scores,]
+df$rank = rank(df$INCOME)
+head(df, n = 1)
+tail(df, n = 1)
+```
+
+### What is the maximum pasta quantity a household has bought over the whole time period? (Sum the quantity of pasta by household over time and indicate the maximum)
+
+```{r}
+q3 = df %>% group_by(HHID) %>% summarize(pasta_qty = sum(PASTA) )
+
+max(q3$pasta_qty)
+```
+
+### What is the average income of households living in area 4? 
+
+```{r}
+q4 = subset(df, AREA == 4, select = c(HHID, INCOME))
+q41 = distinct(q4, HHID, .keep_all = TRUE)
+mean(q41$INCOME)
+```
+
+### How many households live in area 2, earn more than 20k, and have purchased more than 30 units of pasta over the whole time period? 
+
+```{r}
+q5 = df %>% filter(AREA == 2) %>% filter(INCOME > 20000) %>%
+      group_by(HHID) %>% 
+      summarize(total_qty = sum(PASTA) ) %>% filter(total_qty > 30)
+nrow(q5)
+```
+
+### What is the correlation between the purchases of pasta and the exposures?
+
+```{r}
+cor(df$PASTA, df$EXPOS)
+```
+
+### Which of the following graphs reports the correct histogram by household of the total purchase of pasta made by the household over the whole period? (Sum the purchases by household and make a histogram.)
+
+#### Note that the color or exact representation may be different in your version.
+
+```{r}
+q7 = df %>% group_by(HHID) %>%
+      summarize(total = sum(PASTA))
+q71 = distinct(q7, HHID, .keep_all = TRUE)
+hist(q71$total, ylim = c(0,700), main = "Total purchase of pasta by Household", xlab = "Purchases", ylab = "Frequencies", col = "blue")
+```
+
+### Which of the following graphs reports the correct time series of the overall total purchase of pasta? (Sum the purchases by time units and plot the quantity by time unit.)
+
+```{r}
+q8 = df %>% group_by(TIME) %>% summarize( total_qty = sum(PASTA))
+plot(q8$total_qty, main = "Time series of overall total purchase of pasta", col = "blue", xlab = "Time", ylab = "Quantity")
+```
+
